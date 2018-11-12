@@ -31,11 +31,19 @@ For any schema input files, one or more generators can be specified:
 
 -   `--js`, `-s`: Generate JavaScript code.
 
+-   `--ts`: Generate TypeScript code.
+
 -   `--php`: Generate PHP code.
 
 -   `--grpc`: Generate RPC stub code for GRPC.
 
 -   `--dart`: Generate Dart code.
+
+-   `--lua`: Generate Lua code.
+
+-   `--lobster`: Generate Lobster code.
+
+-   `--rust`, `-r` : Generate Rust code.
 
 For any data input files:
 
@@ -88,12 +96,16 @@ Additional options:
     at the cost of efficiency (object allocation). Recommended only to be used
     if other options are insufficient.
 
+-   `--gen-compare` :  Generate operator== for object-based API types.
+
 -   `--gen-onefile` :  Generate single output file (useful for C#)
 
 -   `--gen-all`: Generate not just code for the current schema files, but
     for all files it includes as well. If the language uses a single file for
     output (by default the case for C++ and JS), all code will end up in
     this one file.
+
+-   `--gen-generated`: Add @Generated annotation for Java
 
 -   `--no-js-exports` :  Removes Node.js style export lines (useful for JS)
 
@@ -135,6 +147,11 @@ Additional options:
 -   `--reflect-names` : Add minimal type/name reflection.
 
 -   `--root-type T` : Select or override the default root_type.
+
+-   `--force-defaults` : Emit default values in binary output from JSON.
+
+-   `--force-empty` : When serializing from object API representation, force
+     strings and vectors to empty rather than null.
 
 NOTE: short-form options for generators are deprecated, use the long form
 whenever possible.

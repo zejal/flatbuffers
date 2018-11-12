@@ -12,8 +12,11 @@
 *.vcxproj.user
 *.sln
 *.suo
+*.opendb
 *.keystore
+**/.vs/**
 **/bin/**
+!tests/rust_usage_test/bin/**
 **/gen/**
 **/libs/**
 **/obj/**
@@ -25,6 +28,8 @@
 **/CMakeTestfile.cmake
 **/Debug/**
 **/Release/**
+**/RelWithDebInfo/**
+**/x64/ #build artifacts from VS
 build.xml
 local.properties
 project.properties
@@ -51,6 +56,8 @@ tests/monsterdata_java_wire.mon
 tests/monsterdata_java_wire_sp.mon
 tests/monsterdata_go_wire.mon
 tests/monsterdata_javascript_wire.mon
+tests/monsterdata_lobster_wire.mon
+tests/monsterdata_rust_wire.mon
 tests/unicode_test.mon
 tests/ts/
 tests/php/
@@ -101,3 +108,7 @@ dart/pubspec.lock
 dart/.dart_tool/
 dart/build/
 dart/doc/api/
+Cargo.lock
+.corpus**
+.seed**
+src/idl_parser.cpp

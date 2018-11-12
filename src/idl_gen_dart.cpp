@@ -16,7 +16,6 @@
 
 // independent from idl_parser, since this code is not needed for most clients
 #include <cassert>
-#include <unordered_map>
 
 #include "flatbuffers/code_generators.h"
 #include "flatbuffers/flatbuffers.h"
@@ -52,7 +51,7 @@ static const char *keywords[] = {
 // and tables) and output them to a single file.
 class DartGenerator : public BaseGenerator {
  public:
-  typedef std::unordered_map<std::string, std::string> namespace_code_map;
+  typedef std::map<std::string, std::string> namespace_code_map;
 
   DartGenerator(const Parser &parser, const std::string &path,
                 const std::string &file_name)
@@ -77,6 +76,10 @@ class DartGenerator : public BaseGenerator {
       code += "import 'dart:typed_data' show Uint8List;\n";
       code += "import 'package:flat_buffers/flat_buffers.dart' as " + _kFb +
               ";\n\n";
+
+      if (parser_.opts.include_dependence_headers) {
+        GenIncludeDependencies(&code, kv->first);
+      }
 
       for (auto kv2 = namespace_code.begin(); kv2 != namespace_code.end();
            ++kv2) {
@@ -130,6 +133,19 @@ class DartGenerator : public BaseGenerator {
     // std::transform(ret.begin(), ret.end(), ret.begin(), ::tolower);
     return ret;
   }
+
+  void GenIncludeDependencies(std::string* code, const std::string& the_namespace) {
+    for (auto it = parser_.included_files_.begin();
+         it != parser_.included_files_.end(); ++it) {
+      if (it->second.empty()) continue;
+
+      auto noext = flatbuffers::StripExtension(it->second);
+      auto basename = flatbuffers::StripPath(noext);
+
+      *code += "import '" + GeneratedFileName("", basename + "_" + the_namespace) + "';\n";
+    }
+  }
+
   static std::string EscapeKeyword(const std::string &name) {
     for (size_t i = 0; i < sizeof(keywords) / sizeof(keywords[0]); i++) {
       if (name == keywords[i]) { return MakeCamel(name + "_", false); }
@@ -518,9 +534,19 @@ class DartGenerator : public BaseGenerator {
           code += ".vTableGet(_bc, _bcOffset, " +
                   NumToString(field.value.offset) + ", ";
           if (!field.value.constant.empty() && field.value.constant != "0") {
-            code += field.value.constant;
+            if (IsBool(field.value.type.base_type)) {
+              code += "true";
+            } else {
+              code += field.value.constant;
+            }
           } else {
-            code += "null";
+            if (IsBool(field.value.type.base_type)) {
+              code += "false";
+            } else if (IsScalar(field.value.type.base_type)) {
+              code += "0";
+            } else {
+              code += "null";
+            }
           }
           code += ")";
         }

@@ -31,6 +31,9 @@ Please select your desired language for our quest:
   <input type="radio" name="language" value="php">PHP</input>
   <input type="radio" name="language" value="c">C</input>
   <input type="radio" name="language" value="dart">Dart</input>
+  <input type="radio" name="language" value="lua">Lua</input>
+  <input type="radio" name="language" value="lobster">Lobster</input>
+  <input type="radio" name="language" value="rust">Rust</input>
 </form>
 \endhtmlonly
 
@@ -136,6 +139,16 @@ For your chosen language, please cross-reference with:
 <div class="language-dart">
 [example.dart](https://github.com/google/flatbuffers/blob/master/dart/example/example.dart)
 </div>
+<div class="language-lua">
+[sample_binary.lua](https://github.com/google/flatbuffers/blob/master/samples/sample_binary.lua)
+</div>
+<div class="language-lobster">
+[sample_binary.lobster](https://github.com/google/flatbuffers/blob/master/samples/sample_binary.lobster)
+</div>
+<div class="language-rust">
+[sample_binary.rs](https://github.com/google/flatbuffers/blob/master/samples/sample_binary.rs)
+</div>
+
 
 ## Writing the Monsters' FlatBuffer Schema
 
@@ -262,49 +275,49 @@ Please be aware of the difference between `flatc` and `flatcc` tools.
 <div class="language-cpp">
 ~~~{.sh}
   cd flatbuffers/sample
-  ./../flatc --cpp samples/monster.fbs
+  ./../flatc --cpp monster.fbs
 ~~~
 </div>
 <div class="language-java">
 ~~~{.sh}
   cd flatbuffers/sample
-  ./../flatc --java samples/monster.fbs
+  ./../flatc --java monster.fbs
 ~~~
 </div>
 <div class="language-csharp">
 ~~~{.sh}
   cd flatbuffers/sample
-  ./../flatc --csharp samples/monster.fbs
+  ./../flatc --csharp monster.fbs
 ~~~
 </div>
 <div class="language-go">
 ~~~{.sh}
   cd flatbuffers/sample
-  ./../flatc --go samples/monster.fbs
+  ./../flatc --go monster.fbs
 ~~~
 </div>
 <div class="language-python">
 ~~~{.sh}
   cd flatbuffers/sample
-  ./../flatc --python samples/monster.fbs
+  ./../flatc --python monster.fbs
 ~~~
 </div>
 <div class="language-javascript">
 ~~~{.sh}
   cd flatbuffers/sample
-  ./../flatc --js samples/monster.fbs
+  ./../flatc --js monster.fbs
 ~~~
 </div>
 <div class="language-typescript">
 ~~~{.sh}
   cd flatbuffers/sample
-  ./../flatc --ts samples/monster.fbs
+  ./../flatc --ts monster.fbs
 ~~~
 </div>
 <div class="language-php">
 ~~~{.sh}
   cd flatbuffers/sample
-  ./../flatc --php samples/monster.fbs
+  ./../flatc --php monster.fbs
 ~~~
 </div>
 <div class="language-c">
@@ -319,7 +332,25 @@ Please be aware of the difference between `flatc` and `flatcc` tools.
 <div class="language-dart">
 ~~~{.sh}
   cd flatbuffers/sample
-  ./../flatc --dart samples/monster.fbs
+  ./../flatc --dart monster.fbs
+~~~
+</div>
+<div class="language-lua">
+~~~{.sh}
+  cd flatbuffers/sample
+  ./../flatc --lua monster.fbs
+~~~
+</div>
+<div class="language-lobster">
+~~~{.sh}
+  cd flatbuffers/sample
+  ./../flatc --lobster monster.fbs
+~~~
+</div>
+<div class="language-rust">
+~~~{.sh}
+  cd flatbuffers/sample
+  ./../flatc --rust monster.fbs
 ~~~
 </div>
 
@@ -439,6 +470,40 @@ The first step is to import/include the library, generated files, etc.
   import 'monster_my_game.sample_generated.dart' as myGame;
 ~~~
 </div>
+<div class="language-lua">
+~~~{.lua}
+  -- require the flatbuffers module
+  local flatbuffers = require("flatbuffers")
+
+  -- require the generated files from `flatc`.
+  local color = require("MyGame.Sample.Color")
+  local equipment = require("MyGame.Sample.Equipment")
+  local monster = require("MyGame.Sample.Monster")
+  local vec3 = require("MyGame.Sample.Vec3")
+  local weapon = require("MyGame.Sample.Weapon")
+~~~
+</div>
+<div class="language-lobster">
+~~~{.lobster}
+  include from "../lobster/"  // Where to find flatbuffers.lobster
+  include "monster_generated.lobster"
+~~~
+</div>
+<div class="language-rust">
+~~~{.rs}
+  // import the flatbuffers runtime library
+  extern crate flatbuffers;
+
+  // import the generated code
+  #[path = "./monster_generated.rs"]
+  mod monster_generated;
+  pub use monster_generated::my_game::sample::{get_root_as_monster,
+                                               Color, Equipment,
+                                               Monster, MonsterArgs,
+                                               Vec3,
+                                               Weapon, WeaponArgs};
+~~~
+</div>
 
 Now we are ready to start building some buffers. In order to start, we need
 to create an instance of the `FlatBufferBuilder`, which will contain the buffer
@@ -516,6 +581,25 @@ which will grow automatically if needed:
   // you can use the convenience method `toBytes()` on the generated builders.
   // For example, you could do something like `new myGame.MonsterBuilder(...).toBytes()`
   var builder = new fb.Builder(initialSize: 1024);
+~~~
+</div>
+<div class="language-lua">
+~~~{.lua}
+  -- get access to the builder, providing an array of size 1024
+  local builder = flatbuffers.Builder(1024)
+~~~
+</div>
+<div class="language-lobster">
+~~~{.lobster}
+  -- get access to the builder
+  let builder = flatbuffers_builder {}
+~~~
+</div>
+<div class="language-rust">
+~~~{.rs}
+  // Build up a serialized buffer algorithmically.
+  // Initialize it with a capacity of 1024 bytes.
+  let mut builder = flatbuffers::FlatBufferBuilder::new_with_capacity(1024);
 ~~~
 </div>
 
@@ -705,6 +789,55 @@ our `orc` Monster, lets create some `Weapon`s: a `Sword` and an `Axe`.
   );
 ~~~
 </div>
+<div class="language-lua">
+~~~{.lua}
+    local weaponOne = builder:CreateString("Sword")
+    local weaponTwo = builder:CreateString("Axe")
+
+    -- Create the first 'Weapon'
+    weapon.Start(builder)
+    weapon.AddName(builder, weaponOne)
+    weapon.AddDamage(builder, 3)
+    local sword = weapon.End(builder)
+
+    -- Create the second 'Weapon'
+    weapon.Start(builder)
+    weapon.AddName(builder, weaponTwo)
+    weapon.AddDamage(builder, 5)
+    local axe = weapon.End(builder)
+~~~
+</div>
+<div class="language-lobster">
+~~~{.lobster}
+  let weapon_names = [ "Sword", "Axe" ]
+  let weapon_damages = [ 3, 5 ]
+
+  weapon_offsets := map(weapon_names) name, i:
+      let ns = builder.CreateString(name)
+      builder.MyGame_Sample_WeaponStart()
+      builder.MyGame_Sample_WeaponAddName(ns)
+      builder.MyGame_Sample_WeaponAddDamage(weapon_damages[i])
+      builder.MyGame_Sample_WeaponEnd()
+~~~
+</div>
+<div class="language-rust">
+~~~{.rs}
+  // Serialize some weapons for the Monster: A 'sword' and an 'axe'.
+  let weapon_one_name = builder.create_string("Sword");
+  let weapon_two_name = builder.create_string("Axe");
+
+  // Use the `Weapon::create` shortcut to create Weapons with named field
+  // arguments.
+  let sword = Weapon::create(&mut builder, &WeaponArgs{
+      name: Some(weapon_one_name),
+      damage: 3,
+  });
+  let axe = Weapon::create(&mut builder, &WeaponArgs{
+      name: Some(weapon_two_name),
+      damage: 5,
+  });
+~~~
+</div>
 
 Now let's create our monster, the `orc`. For this `orc`, lets make him
 `red` with rage, positioned at `(1.0, 2.0, 3.0)`, and give him
@@ -852,6 +985,39 @@ traversal. This is generally easy to do on any tree structures.
   final List<int> treasure = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 ~~~
 </div>
+<div class="language-lua">
+~~~{.py}
+    -- Serialize a name for our mosnter, called 'orc'
+    local name = builder:CreateString("Orc")
+
+    -- Create a `vector` representing the inventory of the Orc. Each number
+    -- could correspond to an item that can be claimed after he is slain.
+    -- Note: Since we prepend the bytes, this loop iterates in reverse.
+    monster.StartInventoryVector(builder, 10)
+    for i=10,1,-1 do
+        builder:PrependByte(i)
+    end
+    local inv = builder:EndVector(10)
+~~~
+</div>
+<div class="language-lobster">
+~~~{.lobster}
+  // Name of the monster.
+  let name = builder.CreateString("Orc")
+
+  // Inventory.
+  let inv = builder.MyGame_Sample_MonsterCreateInventoryVector(map(10): _)
+~~~
+</div>
+<div class="language-rust">
+~~~{.rs}
+  // Name of the Monster.
+  let name = builder.create_string("Orc");
+
+  // Inventory.
+  let inventory = builder.create_vector(&[0u8, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+~~~
+</div>
 
 We serialized two built-in data types (`string` and `vector`) and captured
 their return values. These values are offsets into the serialized data,
@@ -964,8 +1130,29 @@ offsets.
   final List<myGame.WeaponBuilder> weaps = [sword, axe];
 ~~~
 </div>
+<div class="language-lua">
+~~~{.lua}
+    -- Create a FlatBuffer vector and prepend the weapons.
+    -- Note: Since we prepend the data, prepend them in reverse order.
+    monster.StartWeaponsVector(builder, 2)
+    builder:PrependUOffsetTRelative(axe)
+    builder:PrependUOffsetTRelative(sword)
+    local weapons = builder:EndVector(2)
+~~~
+</div>
+<div class="language-lobster">
+~~~{.lobster}
+  let weapons = builder.MyGame_Sample_MonsterCreateWeaponsVector(weapon_offsets)
+~~~
+</div>
+<div class="language-rust">
+~~~{.rs}
+  // Create a FlatBuffer `vector` that contains offsets to the sword and axe
+  // we created above.
+  let weapons = builder.create_vector(&[sword, axe]);
+~~~
+</div>
 
-<div class="language-cpp">
 <br>
 Note there's additional convenience overloads of `CreateVector`, allowing you
 to work with data that's not in a `std::vector`, or allowing you to generate
@@ -1061,6 +1248,36 @@ for the `path` field above:
     new myGame.Vec3ObjectBuilder(x: 1.0, y: 2.0, z: 3.0),
     new myGame.Vec3ObjectBuilder(x: 4.0, y: 5.0, z: 6.0)
   ];
+~~~
+</div>
+<div class="language-lua">
+~~~{.lua}
+    -- Create a FlatBuffer vector and prepend the path locations.
+    -- Note: Since we prepend the data, prepend them in reverse order.
+    monster.StartPathVector(builder, 2)
+    vec3.CreateVec3(builder, 1.0, 2.0, 3.0)
+    vec3.CreateVec3(builder, 4.0, 5.0, 6.0)
+    local path = builder:EndVector(2)
+~~~
+</div>
+<div class="language-lobster">
+~~~{.lobster}
+  builder.MyGame_Sample_MonsterStartPathVector(2)
+  builder.MyGame_Sample_CreateVec3(1.0, 2.0, 3.0)
+  builder.MyGame_Sample_CreateVec3(4.0, 5.0, 6.0)
+  let path = builder.EndVector(2)
+~~~
+</div>
+<div class="language-rust">
+~~~{.rs}
+  // Create the path vector of Vec3 objects.
+  let x = Vec3::new(1.0, 2.0, 3.0);
+  let y = Vec3::new(4.0, 5.0, 6.0);
+  let path = builder.create_vector(&[x, y]);
+
+  // Note that, for convenience, it is also valid to create a vector of
+  // references to structs, like this:
+  // let path = builder.create_vector(&[&x, &y]);
 ~~~
 </div>
 
@@ -1267,6 +1484,58 @@ can serialize the monster itself:
   final int orc = orcBuilder.finish(builder);
 ~~~
 </div>
+<div class="language-lua">
+~~~{.lua}
+    -- Create our monster by using Start() andEnd()
+    monster.Start(builder)
+    monster.AddPos(builder, vec3.CreateVec3(builder, 1.0, 2.0, 3.0))
+    monster.AddHp(builder, 300)
+    monster.AddName(builder, name)
+    monster.AddInventory(builder, inv)
+    monster.AddColor(builder, color.Red)
+    monster.AddWeapons(builder, weapons)
+    monster.AddEquippedType(builder, equipment.Weapon)
+    monster.AddEquipped(builder, axe)
+    monster.AddPath(builder, path)
+    local orc = monster.End(builder)
+~~~
+</div>
+<div class="language-lobster">
+~~~{.lobster}
+  builder.MyGame_Sample_MonsterStart()
+  builder.MyGame_Sample_MonsterAddPos(builder.MyGame_Sample_CreateVec3(1.0, 2.0, 3.0))
+  builder.MyGame_Sample_MonsterAddHp(300)
+  builder.MyGame_Sample_MonsterAddName(name)
+  builder.MyGame_Sample_MonsterAddInventory(inv)
+  builder.MyGame_Sample_MonsterAddColor(MyGame_Sample_Color_Red)
+  builder.MyGame_Sample_MonsterAddWeapons(weapons)
+  builder.MyGame_Sample_MonsterAddEquippedType(MyGame_Sample_Equipment_Weapon)
+  builder.MyGame_Sample_MonsterAddEquipped(weapon_offsets[1])
+  builder.MyGame_Sample_MonsterAddPath(path)
+  let orc = builder.MyGame_Sample_MonsterEnd()
+~~~
+</div>
+<div class="language-rust">
+~~~{.rs}
+  // Create the monster using the `Monster::create` helper function. This
+  // function accepts a `MonsterArgs` struct, which supplies all of the data
+  // needed to build a `Monster`. To supply empty/default fields, just use the
+  // Rust built-in `Default::default()` function, as demononstrated below.
+  let orc = Monster::create(&mut builder, &MonsterArgs{
+      pos: Some(&Vec3::new(1.0f32, 2.0f32, 3.0f32)),
+      mana: 150,
+      hp: 80,
+      name: Some(name),
+      inventory: Some(inventory),
+      color: Color::Red,
+      weapons: Some(weapons),
+      equipped_type: Equipment::Weapon,
+      equipped: Some(axe.as_union_value()),
+      path: Some(path),
+      ..Default::default()
+  });
+~~~
+</div>
 
 Note how we create `Vec3` struct in-line in the table. Unlike tables, structs
 are simple combinations of scalars that are always stored inline, just like
@@ -1409,6 +1678,26 @@ Here is a repetition these lines, to help highlight them more clearly:
   equipped: axe,                                  // Union data
 ~~~
 </div>
+<div class="language-lua">
+~~~{.lua}
+    monster.AddEquippedType(builder, equipment.Weapon) -- Union type
+    monster.AddEquipped(builder, axe) -- Union data
+~~~
+</div>
+<div class="language-lobster">
+~~~{.lobster}
+  builder.MyGame_Sample_MonsterAddEquippedType(MyGame_Sample_Equipment_Weapon)
+  builder.MyGame_Sample_MonsterAddEquipped(axe)
+~~~
+</div>
+<div class="language-rust">
+  ~~~{.rs}
+    // You need to call `as_union_value` to turn an object into a type that
+    // can be used as a union value.
+    monster_builder.add_equipped_type(Equipment::Weapon); // Union type
+    monster_builder.add_equipped(axe.as_union_value()); // Union data
+  ~~~
+</div>
 
 After you have created your buffer, you will have the offset to the root of the
 data in the `orc` variable, so you can finish the buffer by calling the
@@ -1478,6 +1767,24 @@ appropriate `finish` method.
 ~~~{.dart}
   // Call `finish()` to instruct the builder that this monster is complete.
   // See the next code section, as in Dart `finish` will also return the byte array.
+~~~
+</div>
+<div class="language-lua">
+~~~{.lua}
+    -- Call 'Finish()' to instruct the builder that this monster is complete.
+    builder:Finish(orc)
+~~~
+</div>
+<div class="language-lobster">
+~~~{.lobster}
+  // Call `Finish()` to instruct the builder that this monster is complete.
+  builder.Finish(orc)
+~~~
+</div>
+<div class="language-rust">
+~~~{.rs}
+  // Call `finish()` to instruct the builder that this monster is complete.
+  builder.finish(orc, None);
 ~~~
 </div>
 
@@ -1577,6 +1884,26 @@ like so:
   final Uint8List buf = builder.finish(orc);
 ~~~
 </div>
+<div class="language-lua">
+~~~{.lua}
+    -- Get the flatbuffer as a string containing the binary data
+    local bufAsString = builder:Output()
+~~~
+</div>
+<div class="language-lobster">
+~~~{.lobster}
+  // This must be called after `Finish()`.
+  let buf = builder.SizedCopy() // Of type `string`.
+~~~
+</div>
+<div class="language-rust">
+~~~{.rs}
+  // This must be called after `finish()`.
+  // `finished_data` returns a byte slice.
+  let buf = builder.finished_data(); // Of type `&[u8]`
+~~~
+</div>
+
 
 Now you can write the bytes to a file, send them over the network..
 **Make sure your file mode (or tranfer protocol) is set to BINARY, not text.**
@@ -1587,7 +1914,7 @@ which will lead to hard to find problems when you read the buffer.
 
 Now that we have successfully created an `Orc` FlatBuffer, the monster data can
 be saved, sent over a network, etc. Let's now adventure into the inverse, and
-deserialize a FlatBuffer.
+access a FlatBuffer.
 
 This section requires the same import/include, namespace, etc. requirements as
 before:
@@ -1688,6 +2015,40 @@ before:
 ~~~{.dart}
 import 'package:flat_buffers/flat_buffers.dart' as fb;
 import './monster_my_game.sample_generated.dart' as myGame;
+~~~
+</div>
+<div class="language-lua">
+~~~{.lua}
+  -- require the flatbuffers module
+  local flatbuffers = require("flatbuffers")
+
+  -- require the generated files from `flatc`.
+  local color = require("MyGame.Sample.Color")
+  local equipment = require("MyGame.Sample.Equipment")
+  local monster = require("MyGame.Sample.Monster")
+  local vec3 = require("MyGame.Sample.Vec3")
+  local weapon = require("MyGame.Sample.Weapon")
+~~~
+</div>
+<div class="language-lobster">
+~~~{.lobster}
+  include from "../lobster/"  // Where to find flatbuffers.lobster
+  include "monster_generated.lobster"
+~~~
+</div>
+<div class="language-rust">
+~~~{.rs}
+  // import the flatbuffers runtime library
+  extern crate flatbuffers;
+
+  // import the generated code
+  #[path = "./monster_generated.rs"]
+  mod monster_generated;
+  pub use monster_generated::my_game::sample::{get_root_as_monster,
+                                               Color, Equipment,
+                                               Monster, MonsterArgs,
+                                               Vec3,
+                                               Weapon, WeaponArgs};
 ~~~
 </div>
 
@@ -1798,6 +2159,33 @@ List<int> data = ... // the data, e.g. from file or network
 myGame.Monster monster = new myGame.Monster(data);
 ~~~
 </div>
+<div class="language-lua">
+~~~{.lua}
+    local bufAsString =   -- The data you just read in
+
+    -- Convert the string representation into binary array Lua structure
+    local buf = flatbuffers.binaryArray.New(bufAsString)
+
+    -- Get an accessor to the root object insert the buffer
+    local mon = monster.GetRootAsMonster(buf, 0)
+~~~
+</div>
+<div class="language-lobster">
+~~~{.lobster}
+  buf = /* the data you just read, in a string */
+
+  // Get an accessor to the root object inside the buffer.
+  let monster = MyGame_Sample_GetRootAsMonster(buf)
+~~~
+</div>
+<div class="language-rust">
+~~~{.rs}
+  let buf = /* the data you just read, in a &[u8] */
+
+  // Get an accessor to the root object inside the buffer.
+  let monster = get_root_as_monster(buf);
+~~~
+</div>
 
 If you look in the generated files from the schema compiler, you will see it generated
 accessors for all non-`deprecated` fields. For example:
@@ -1874,6 +2262,28 @@ accessors for all non-`deprecated` fields. For example:
   var hp = monster.hp;
   var mana = monster.mana;
   var name = monster.name;
+~~~
+</div>
+<div class="language-lua">
+~~~{.lua}
+  local hp = mon:Hp()
+  local mana = mon:Mana()
+  local name = mon:Name()
+~~~
+</div>
+<div class="language-lobster">
+~~~{.lobster}
+  let hp = monster.hp
+  let mana = monster.mana
+  let name = monster.name
+~~~
+</div>
+<div class="language-rust">
+~~~{.rs}
+  // Get and test some scalar types from the FlatBuffer.
+  let hp = monster.hp();
+  let mana = monster.mana();
+  let name = monster.name();
 ~~~
 </div>
 
@@ -1969,6 +2379,30 @@ To access sub-objects, in the case of our `pos`, which is a `Vec3`:
   double z = pos.z;
 ~~~
 </div>
+<div class="language-lua">
+~~~{.lua}
+  local pos = mon:Pos()
+  local x = pos:X()
+  local y = pos:Y()
+  local z = pos:Z()
+~~~
+</div>
+<div class="language-lobster">
+~~~{.lobster}
+  let pos = monster.pos
+  let x = pos.x
+  let y = pos.y
+  let z = pos.z
+~~~
+</div>
+<div class="language-rust">
+~~~{.rs}
+  let pos = monster.pos().unwrap();
+  let x = pos.x();
+  let y = pos.y();
+  let z = pos.z();
+~~~
+</div>
 
 `x`, `y`, and `z` will contain `1.0`, `2.0`, and `3.0`, respectively.
 
@@ -2039,6 +2473,28 @@ FlatBuffers `vector`.
 ~~~{.dart}
   int invLength = monster.inventory.length;
   var thirdItem = monster.inventory[2];
+~~~
+</div>
+<div class="language-lua">
+~~~{.lua}
+  local invLength = mon:InventoryLength()
+  local thirdItem = mon:Inventory(3) -- Lua is 1-based
+~~~
+</div>
+<div class="language-lobster">
+~~~{.lobster}
+  let inv_len = monster.inventory_length
+  let third_item = monster.inventory(2)
+~~~
+</div>
+<div class="language-rust">
+~~~{.rs}
+  // Get a test an element from the `inventory` FlatBuffer's `vector`.
+  let inv = monster.inventory().unwrap();
+
+  // Note that this vector is returned as a slice, because direct access for
+  // this type, a `u8` vector, is safe on all platforms:
+  let third_item = inv[2];
 ~~~
 </div>
 
@@ -2120,6 +2576,31 @@ except your need to handle the result as a FlatBuffer `table`:
   int weaponsLength = monster.weapons.length;
   var secondWeaponName = monster.weapons[1].name;
   var secondWeaponDamage = monster.Weapons[1].damage;
+~~~
+</div>
+<div class="language-lua">
+~~~{.lua}
+  local weaponsLength = mon:WeaponsLength()
+  local secondWeaponName = mon:Weapon(2):Name()
+  local secondWeaponDamage = mon:Weapon(2):Damage()
+~~~
+</div>
+<div class="language-lobster">
+~~~{.lobster}
+  let weapons_length = monster.weapons_length
+  let second_weapon_name = monster.weapons(1).name
+  let second_weapon_damage = monster.weapons(1).damage
+~~~
+</div>
+<div class="language-rust">
+~~~{.rs}
+  // Get and test the `weapons` FlatBuffers's `vector`.
+  let weps = monster.weapons().unwrap();
+  let weps_len = weps.len();
+
+  let wep2 = weps.get(1);
+  let second_weapon_name = wep2.name();
+  let second_weapon_damage = wep2.damage();
 ~~~
 </div>
 
@@ -2257,6 +2738,44 @@ We can access the type to dynamically cast the data as needed (since the
   }
 ~~~
 </div>
+<div class="language-lua">
+~~~{.lua}
+  local unionType = mon:EquippedType()
+
+  if unionType == equipment.Weapon then
+    local unionWeapon = weapon.New()
+    unionWeapon:Init(mon:Equipped().bytes, mon:Equipped().pos)
+
+    local weaponName = unionWeapon:Name()     -- 'Axe'
+    local weaponDamage = unionWeapon:Damage() -- 5
+  end
+~~~
+</div>
+<div class="language-lobster">
+~~~{.lobster}
+  union_type = monster.equipped_type
+
+  if union_type == MyGame_Sample_Equipment_Weapon:
+      // `monster.equipped_as_Weapon` returns a FlatBuffer handle much like normal table fields,
+      // but this is only valid to call if we already know it is the correct type.
+      let union_weapon = monster.equipped_as_Weapon
+
+      let weapon_name = union_weapon.name     // "Axe"
+      let weapon_damage = union_weapon.damage // 5
+~~~
+</div>
+<div class="language-rust">
+~~~{.rs}
+  // Get and test the `Equipment` union (`equipped` field).
+  // `equipped_as_weapon` returns a FlatBuffer handle much like normal table
+  // fields, but this will return `None` is the union is not actually of that
+  // type.
+  if monster.equipped_type() == Equipment::Weapon {
+    let equipped = monster.equipped_as_weapon().unwrap();
+    let weapon_name = equipped.name();
+    let weapon_damage = equipped.damage();
+~~~
+</div>
 
 ## Mutating FlatBuffers
 
@@ -2337,6 +2856,21 @@ mutators like so:
   <API for mutating FlatBuffers not yet available in Dart.>
 ~~~
 </div>
+<div class="language-lua">
+~~~{.lua}
+  <API for mutating FlatBuffers is not yet available in Lua.>
+~~~
+</div>
+<div class="language-lobster">
+~~~{.lobster}
+  <API for mutating FlatBuffers is not yet available in Lobster.>
+~~~
+</div>
+<div class="language-rust">
+~~~{.rs}
+  <API for mutating FlatBuffers is not yet available in Rust.>
+~~~
+</div>
 
 We use the somewhat verbose term `mutate` instead of `set` to indicate that this
 is a special use case, not to be confused with the default way of constructing
@@ -2411,6 +2945,11 @@ printers that you can compile and use at runtime. The `flatc` compiler (not
 flatbuffer conversion from a given schema. There are no current plans
 for `flatcc` to support this.*
 </div>
+<div class="language-lobster">
+*Note: If you're working in Lobster, you can also parse JSON at runtime. See the
+[Use in Lobster](@ref flatbuffers_guide_use_lobster) section of the Programmer's
+Guide for more information.*
+</div>
 
 ## Advanced Features for Each Language
 
@@ -2448,6 +2987,15 @@ For your chosen language, see:
 </div>
 <div class="language-dart">
 [Use in Dart](@ref flatbuffers_guide_use_dart)
+</div>
+<div class="language-lua">
+[Use in Lua](@ref flatbuffers_guide_use_lua)
+</div>
+<div class="language-lobster">
+[Use in Lobster](@ref flatbuffers_guide_use_lobster)
+</div>
+<div class="language-rust">
+[Use in Rust](@ref flatbuffers_guide_use_rust)
 </div>
 
 <br>

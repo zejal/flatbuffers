@@ -18,7 +18,7 @@
 
 #include <list>
 
-#define FLATC_VERSION "1.9.0 (" __DATE__ " " __TIME__ ")"
+#define FLATC_VERSION "1.10.0 (" __DATE__ " " __TIME__ ")"
 
 namespace flatbuffers {
 
@@ -88,10 +88,12 @@ std::string FlatCompiler::GetUsageString(const char *program_name) const {
     "  --gen-onefile      Generate single output file for C# and Go.\n"
     "  --gen-name-strings Generate type name functions for C++.\n"
     "  --gen-object-api   Generate an additional object-based API.\n"
+    "  --gen-compare      Generate operator== for object-based API types.\n"
     "  --cpp-ptr-type T   Set object API pointer type (default std::unique_ptr)\n"
     "  --cpp-str-type T   Set object API string type (default std::string)\n"
     "                     T::c_str() and T::length() must be supported\n"
     "  --gen-nullable     Add Clang _Nullable for C++ pointer. or @Nullable for Java\n"
+    "  --gen-generated    Add @Generated annotation for Java\n"
     "  --object-prefix    Customise class prefix for C++ object-based API.\n"
     "  --object-suffix    Customise class suffix for C++ object-based API.\n"
     "                     Default value is \"T\"\n"
@@ -122,6 +124,9 @@ std::string FlatCompiler::GetUsageString(const char *program_name) const {
     "  --reflect-types    Add minimal type reflection to code generation.\n"
     "  --reflect-names    Add minimal type/name reflection.\n"
     "  --root-type T      Select or override the default root_type\n"
+    "  --force-defaults   Emit default values in binary output from JSON\n"
+    "  --force-empty      When serializing from object API representation,\n"
+    "                     force strings and vectors to empty rather than null.\n"
     "FILEs may be schemas (must end in .fbs), or JSON files (conforming to preceding\n"
     "schema). FILEs after the -- must be binary flatbuffer format files.\n"
     "Output files are named using the base file name of the input,\n"
@@ -219,6 +224,8 @@ int FlatCompiler::Compile(int argc, const char **argv) {
         opts.generate_name_strings = true;
       } else if (arg == "--gen-object-api") {
         opts.generate_object_based_api = true;
+      } else if (arg == "--gen-compare") {
+        opts.gen_compare = true;
       } else if (arg == "--cpp-ptr-type") {
         if (++argi >= argc) Error("missing type following" + arg, true);
         opts.cpp_object_api_pointer_type = argv[argi];
@@ -227,6 +234,8 @@ int FlatCompiler::Compile(int argc, const char **argv) {
         opts.cpp_object_api_string_type = argv[argi];
       } else if (arg == "--gen-nullable") {
         opts.gen_nullable = true;
+      } else if (arg == "--gen-generated") {
+        opts.gen_generated = true;
       } else if (arg == "--object-prefix") {
         if (++argi >= argc) Error("missing prefix following" + arg, true);
         opts.object_prefix = argv[argi];
@@ -277,6 +286,10 @@ int FlatCompiler::Compile(int argc, const char **argv) {
       } else if (arg == "--root-type") {
         if (++argi >= argc) Error("missing type following" + arg, true);
         opts.root_type = argv[argi];
+      } else if (arg == "--force-defaults") {
+        opts.force_defaults = true;
+      } else if (arg == "--force-empty") {
+        opts.set_empty_to_null = false;
       } else {
         for (size_t i = 0; i < params_.num_generators; ++i) {
           if (arg == params_.generators[i].generator_opt_long ||
